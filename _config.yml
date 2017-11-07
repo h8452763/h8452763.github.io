@@ -1,7 +1,7 @@
 # Basic
 title: Zyua
 subtitle: Zyua 是一个逗逼
-welcome_message: <a href="https://github.com/onevcat/vno-jekyll" target="_blank">Download the theme</a>
+welcome_message: <a href="https://github.com/h8452763" target="_blank">Open my github</a>
 description: I love UUU
 creator: <a href="http://onev.cat">@onevcat</a>
 
@@ -22,7 +22,7 @@ blog_button:
 
 # Navigation buttons in the front page.
 nav:
-    - {title: Projects, description: My Projects, url: 'http://project.onevcat.com'}
+   # - {title: Projects, description: My Projects, url: 'http://project.onevcat.com'}
     # - {title: Another Button, description: A button, url: 'http://example.com'}
 
 # Pagination
