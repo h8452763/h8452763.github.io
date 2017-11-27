@@ -4,11 +4,11 @@ title: Android 内存泄漏总结
 date: 2017-02-15 15:32:24.000000000 +09:00
 ---
 内存管理的目的是我们在开发的过程中有效的避免出现内存泄漏的问题。
- ####`概念`
+ #### `概念`
 内存泄漏简单的讲就是该释放的内存没有被释放，一直被某个或某些实例所持有却不再被使用导致GC不能回收。
 内存泄露的原因
 首先了解`java内存分类策略`
-#####java内存分类策略
+##### java内存分类策略
 java程序运行时内存分配策略有三种 静态分配 栈式分配和堆式分配，三种存储策略也对应使用的内存空间分别是静态存储区（方法区），栈区和堆区
 + 静态存储区（方法区）：主要用来存放静态数据，全局static数据和常量，这块内存区域在程序编译阶段就已经分配好，在程序整个运行阶段都存在
 + 栈区：当方法被执行时，方法的局部变量（包括基本数据类型和对象的引用）都在栈上创建，并在方法结束时这些局部变量所持有的内存会被自动释放，因为栈内存分配运算内置于处理器的指令集中，效率很高，但分配内存有限。
@@ -33,7 +33,7 @@ Sample mSample3 = new Sample();
 {% endhighlight %}
 
 Sample中S1 mSample1 等类的成员变量存放在堆内存中，S2和 sample2 的引用存放在栈内存中，但是sample2所指向的对象存放在堆内存中，而sample3所指向的实体对象存放在堆上，包括这个对象的成员变量s1和mSample1,而自己存于栈中。
-######结论、
+###### 结论、
 局部变量的基本数据类型和引用存储在栈中，引用的对象实体存储于堆中---属于方法中的变量，生命周期随着方法而结束
 成员变量全部存储于堆中（包括基本数据类型，引用和饮用的对象实体）---因为她们属于类，类对象是new出来用的。
 java的内存管理就是对象的分配和释放问题。GC监控对象的状态就是为了更加准确，及时的释放对象，而释放对象根本的原则就是该对象不再被引用。
@@ -98,6 +98,7 @@ android中常见的内存泄漏汇总
 ###单例造成的内存泄漏
 
 由于单例的静态特性使得其生命周期跟应用的生命周期一样长，所以如果使用不恰当的话，很容易造成内存泄漏。比如下面一个典型的例子，
+{% highlight ruby %}
 
 public class AppManager {
 private static AppManager instance;
@@ -112,6 +113,8 @@ instance = new AppManager(context);
 return instance;
 }
 }
+
+{% endhighlight %}
 这是一个普通的单例模式，当创建这个单例的时候，由于需要传入一个Context，所以这个Context的生命周期的长短至关重要：
 
 1、如果此时传入的是 Application 的 Context，因为 Application 的生命周期就是整个应用的生命周期，所以这将没有任何问题。
@@ -119,6 +122,7 @@ return instance;
 2、如果此时传入的是 Activity 的 Context，当这个 Context 所对应的 Activity 退出时，由于该 Context 的引用被单例对象所持有，其生命周期等于整个应用程序的生命周期，所以当前 Activity 退出时它的内存并不会被回收，这就造成泄漏了。
 
 正确的方式应该改为下面这种方式：
+{% highlight ruby %}
 
 public class AppManager {
 private static AppManager instance;
@@ -133,9 +137,12 @@ instance = new AppManager(context);
 return instance;
 }
 }
+
+{% endhighlight %}
 或者这样写，连 Context 都不用传进来了：
 
 在你的 Application 中添加一个静态方法，getContext() 返回 Application 的 context，
+{% highlight ruby %}
 
 ...
 
@@ -163,6 +170,8 @@ instance = new AppManager();
 return instance;
 }
 }
+
+{% endhighlight %}
 因为非静态内部类默认会持有外部类的引用
 ###匿名内部类
 
@@ -178,7 +187,7 @@ Handler 的使用造成的内存泄漏问题应该说是最为常见了，很多
 
 比如： Bitmap 没调用 recycle()方法，对于 Bitmap 对象在不使用时,我们应该先调用 recycle() 释放内存，然后才它设置为 null. 因为加载 Bitmap 对象的内存空间，一部分是 java 的，一部分 C 的（因为 Bitmap 分配的底层是通过 JNI 调用的 )。 而这个 recyle() 就是针对 C 部分的内存释放。 构造 Adapter 时，没有使用缓存的 convertView ,每次都在创建新的 converView。这里推荐使用 ViewHolder。
 
-##总结
+## 总结
 
 对 Activity 等组件的引用应该控制在 Activity 的生命周期之内； 如果不能就考虑使用 getApplicationContext 或者 getApplication，以避免 Activity 被外部长生命周期的对象引用而泄露。
 
