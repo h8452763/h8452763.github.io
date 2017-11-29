@@ -3,6 +3,8 @@ layout: post
 title: 单例模式
 date: 2016-02-16 15:32:24.000000000 +09:00
 ---
+
+
 ###### 单例模式
 保证一个类只有一个实例，并提供一个访问它的全局访问点 就是单例模式
 有懒汉式和饿汉式
@@ -13,6 +15,7 @@ date: 2016-02-16 15:32:24.000000000 +09:00
 懒汉式的线程安全问题
 双重加锁解决
 双重加锁机制实现使用一个关键字是volatile 意思是被volatile修饰的变量，将不会被本地线程缓存，直接操作共享内存，从而确保多个线程处理该变量
+
 {% highlight ruby %}
 public class Singleton {
     private volatile static SingleTon instance=null;
@@ -26,10 +29,10 @@ public class Singleton {
         }
         return instance；
     }
-}
 {% endhighlight %}
 
 还有一种就是静态内部类不会引用外部变量 只有被调用的时候才会绑定 也达到了延迟加载的目的 静态初始化保证JVM的安全
+
 {% highlight ruby %}
 public class Singleton {
 
@@ -59,6 +62,7 @@ public class Singleton {
 }
 {% endhighlight %}
 #####  最后一种方法就是 高效java第二版里面的单元素枚举类型 是single的最佳方法
+
 {% highlight ruby %}
 /**
  * 使用枚举来实现单例模式的示例
