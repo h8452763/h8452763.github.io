@@ -1,11 +1,11 @@
 # Basic
-title: Zyua
-subtitle: 走在路上的人
-welcome_message: <a href="https://github.com/h8452763" target="_blank">Open my github</a>
-description: 只要在前行，梦想就不再遥远
-creator: <a href="https://github.com/h8452763">@onevcat</a>
+title: Vno Jekyll
+subtitle: A blog-orientation theme for Jekyll
+welcome_message: <a href="https://github.com/onevcat/vno-jekyll" target="_blank">Download the theme</a>
+description: Vno Jekyll is a port of my Ghost theme vno.
+creator: <a href="http://onev.cat">@onevcat</a>
 
-url: "http://1tsky.com"
+url: "http://vno.onevcat.com"
 
 permalink: /:year/:month/:title/
 
@@ -22,7 +22,7 @@ blog_button:
 
 # Navigation buttons in the front page.
 nav:
-   # - {title: Projects, description: My Projects, url: 'http://project.onevcat.com'}
+    - {title: Projects, description: My Projects, url: 'http://project.onevcat.com'}
     # - {title: Another Button, description: A button, url: 'http://example.com'}
 
 # Pagination
@@ -37,11 +37,11 @@ comment:
     
 # Social
 social:
-    weibo: 
-    github: h8452763
-    twitter: 
-    gplus: 
-    mail: 920452531@qq.com
+    weibo: onevcat
+    github: onevcat
+    twitter: onevcat
+    gplus: 107108267983477358170
+    mail: onev@onevcat.com
 
 # Google Analytics
 ga:
