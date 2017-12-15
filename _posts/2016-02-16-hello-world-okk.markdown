@@ -4,42 +4,25 @@ title: 用JNI实现加密字符串
 date: 2017-12-14 21:32:24.000000000 +09:00
 ---
 
-#### What's this
+#### 实现的功能
+实现的功能就是将密钥存储在c文件中 ，用c语言的MD5进行加密，将加密的字符串通过JNI调用传送回去，可以实现网络传输的验证
 
-[Vno Jekyll](https://github.com/onevcat/vno-jekyll) is a theme for [Jekyll](http://jekyllrb.com). It is a port of my Ghost theme [vno](https://github.com/onevcat/vno), which is originally developed from [Dale Anthony's Uno](https://github.com/daleanthony/uno).
+实现起来很简单第一步就是搭建NDK的环境
+[配置环境变量](http://www.jianshu.com/p/b55d562fabd7)
 
-#### Usage
+搭建好了之后可以新建一个官方提供的demo看看目录结构
+[新建项目](http://blog.csdn.net/xiaoyu_93/article/details/53082088)
+记得要关联NDK环境
+![ndk环境](https://raw.githubusercontent.com/smshen/MarkdownPhotos/master/Res/test.jpg)
+这样跑起来之后 可以看见NDK 的样式了具体目录结构参见第一个博客。
+然后根据需求编写自己的代码 。
+#######需求
+实现将需要加密的字符串从java中传递到native层，在native层通过和后台定义好的密钥进行拼接 然后MD5 进行加密，将加密好的字符串从native层传递回java层，
+然后打好so包 将so文件放在需要的项目中就行了
 
-```bash
-$ git clone https://github.com/onevcat/vno-jekyll.git your_site
-$ cd your_site
-$ bundler install
-$ bundler exec jekyll serve
-```
+MD5的c语言加密是在网上找的，然后将转化之后的字符串转化成我们想要的格式 传输回来就行了附上项目[GitHub地址](https://github.com/h8452763/NDKmd5)
 
-Your site with `Vno Jekyll` enabled should be accessible in http://127.0.0.1:4000.
 
-For more information about Jekyll, please visit [Jekyll's site](http://jekyllrb.com).
-
-#### Configuration
-
-All configuration could be done in `_config.yml`. Remember you need to restart to serve the page when after changing the config file. Everything in the config file should be self-explanatory.
-
-#### Background image and avatar
-
-You could replace the background and avatar image in `assets/images` folder to change them.
-
-#### Sites using Vno
-
-[My blog](http://onevcat.com) is using `Vno Jekyll` as well, you could see how it works in real. There are some other sites using the same theme. You can find them below:
-
-| Site Name    | URL                                                |
-| ------------ | ---------------------------------------------------|
-| OneV's Den   | [http://onevcat.com](http://onevcat.com)           |
-| July Tang    | [http://blog.julytang.xyz](http://onevcat.com)     |
-| Harry Lee    | [http://qiuqi.li](http://qiuqi.li)                 |
-
-> If you happen to be using this theme, welcome to [send me a pull request](https://github.com/onevcat/vno-jekyll/pulls) to add your site link here. :)
 
 #### License
 
