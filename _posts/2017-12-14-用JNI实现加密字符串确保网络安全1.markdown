@@ -13,7 +13,7 @@ date: 2017-12-14 21:32:24.000000000 +09:00
 搭建好了之后可以新建一个官方提供的demo看看目录结构
 [新建项目](http://blog.csdn.net/xiaoyu_93/article/details/53082088)
 记得要关联NDK环境
-![ndk环境](https://raw.githubusercontent.com/smshen/MarkdownPhotos/master/Res/test.jpg)
+![ndk环境](https://raw.githubusercontent.com/h8452763/h8452763.github.io/master/photo/WechatIMG34.jpeg)
 这样跑起来之后 可以看见NDK 的样式了具体目录结构参见第一个博客。
 然后根据需求编写自己的代码 。
 #######需求
@@ -24,6 +24,3 @@ MD5的c语言加密是在网上找的，然后将转化之后的字符串转化�
 
 
 
-#### License
-
-Great thanks to [Dale Anthony](https://github.com/daleanthony) and his [Uno](https://github.com/daleanthony/uno). Vno Jekyll is based on Uno, and contains a lot of modification on page layout, animation, font and some more things I can not remember. Vno Jekyll is followed with Uno and be licensed as [Creative Commons Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/). See the link for more information.
