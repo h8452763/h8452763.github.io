@@ -1,182 +1,47 @@
 ---
 layout: post
-title: handler-线程间通信的基本原理
-date: 2017-02-16 15:32:24.000000000 +09:00
+title: 反射
+date: 2018-02-04 15:32:24.000000000 +09:00
 ---
-在Looper中维持一个Thread对象以及MessageQueue对象
-从Looper的构造方法中就可以得出
-{% highlight ruby %}
-private Looper(boolean quitAllowed){
-mQueue=new MessageQueue(quitAllowed);传入参数代表这个Queue是否被退出
-mThread=Thread.currentThread();
-}
-{% endhighlight %}
-在构造方法里面作了两件事
-1.将线程对象指向了创建的Looper的线程
-2.创建了新的MessageQueue
-接下来主要分析两个方法
-+ Looper.loop()
-+ Looper.parpare()
 
-{% highlight ruby %}
- public static void loop() {
-        final Looper me = myLooper();//获得当前线程绑定的Looper
-        if (me == null) {
-            throw new RuntimeException("No Looper; Looper.prepare() wasn't called on this thread.");
-        }
-        final MessageQueue queue = me.mQueue;//获得与Looper绑定的MessageQueue
+ 
+  先应用在看原理
+  以下是我的学习笔记
+   #####反射是框架的设计灵魂
+  （使用的前提是必须先得到代码字节码的class，class 类用于表示.class文件（字节码））
+ ##### 反射的概述
+ java 的反射机制是在运行状态中，对于任何一个类，都能够知道这个累的所有属性和方法，对于任何一个对象，都能够调用他的任意方法与属性，这种动态获取信息以及动态调用对象的方法的功能称为Java语言的反射机制
+ ###反射就是把Java类中的各种成分映射为一个个Java对象
+  ####反射的本质就是得到class对象后，反向的获取student对象的各种信息、
+  一个类只能产生一个class对象
+  class累的实例表示正在运行的Java应用程序中的类和接口，也就是jvm中有N多实例每个类都有该class对象
+  首先获取class对象的三种方式
+  object getclass（）方法
+  任意数据类型都有.class的属性
+  class类的静态方法classforName();
+  第一种是对象都有了 还要反射干什么
+  
+  可以获取构造方法   getConstructors()
+  
+  可以获取成员变量并调用 getFields();
+  
+  解除私有限定 setAccessible();
+  
+  调用对象invoke(obj,20);
+  
+  获取成员方法并调用
+  
+  反射main方法
+  
+  反射方法的其他使用之一 通过反射运行配置文件内容
+  
+  通过反射越过范型检查 
+  
+  范型是在编译期  变异过后范型擦除，所以反射是可以通过范型检查的
+  
 
-        // Make sure the identity of this thread is that of the local process,
-        // and keep track of what that identity token actually is.
-        Binder.clearCallingIdentity();
-        final long ident = Binder.clearCallingIdentity();
-        
-        //进入死循环，不断地去取对象，分发对象到Handler中消费
-        for (;;) {
-            Message msg = queue.next(); // 不断的取下一个Message对象，在这里可能会造成堵塞。
-            if (msg == null) {
-                // No message indicates that the message queue is quitting.
-                return;
-            }
 
-            // This must be in a local variable, in case a UI event sets the logger
-            Printer logging = me.mLogging;
-            if (logging != null) {
-                logging.println(">>>>> Dispatching to " + msg.target + " " +
-                        msg.callback + ": " + msg.what);
-            }
-            
-            //在这里，开始分发Message了
-            //至于这个target是神马？什么时候被赋值的？ 
-            //我们一会分析Handler的时候就会讲到
-            msg.target.dispatchMessage(msg);
-
-            if (logging != null) {
-                logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
-            }
-
-            // Make sure that during the course of dispatching the
-            // identity of the thread wasn't corrupted.
-            final long newIdent = Binder.clearCallingIdentity();
-            if (ident != newIdent) {
-                Log.wtf(TAG, "Thread identity changed from 0x"
-                        + Long.toHexString(ident) + " to 0x"
-                        + Long.toHexString(newIdent) + " while dispatching to "
-                        + msg.target.getClass().getName() + " "
-                        + msg.callback + " what=" + msg.what);
-            }
-            
-            //当分发完Message之后，当然要标记将该Message标记为 *正在使用* 啦
-            msg.recycleUnchecked();
-        }
-    }
-{% endhighlight %}
-上述源代码中最重要的方法有三个
- queue.next()
- msg.target.dispatchMessage(msg);
-  msg.recycleUnchecked();
-Looper 的重要组成部分是 MessageQueue和Message 关系如下
-MessageQueue 装消息的容器
-Message 消息
-Handler（Msg.target）消息的消费者
-Looper 负责分发消息的人
-Looper.parpera()是在当前线程管理一个Looper对象
-{% highlight ruby %}
-private static void prepare(boolean quitAllowed) {
-        if (sThreadLocal.get() != null) {
-            throw new RuntimeException("Only one Looper may be created per thread");
-        }
-        //在当前线程绑定一个Looper
-        sThreadLocal.set(new Looper(quitAllowed));
-    }
-{% endhighlight %}
-parpare()代码只做了两件事 一个是判断当前线程是否有Looper对象，有的话抛出异常，没有的话为当前线程绑定一个Looper 对象
-接下来分析应用的代码 通常我们定义Handler
-{% highlight ruby %}
-Handler handler=new Handler(){
-//你们有没有很好奇这个方法是在哪里被回调的？
-        //我也是！所以接下来会分析到哟！
-        @Override
-        public void handleMessage(Message msg) {
-            //Handler your Message
-        }
-};
-{% endhighlight %}
-首先查看handler的构造方法 
-{% highlight ruby %}
-//空参数的构造方法与之对应，这里只给出主要的代码，具体大家可以到源码中查看
-public Handler(Callback callback, boolean async) {
-        //打印内存泄露提醒log
-        ....
-        
-        //获取与创建Handler线程绑定的Looper
-        mLooper = Looper.myLooper();
-        if (mLooper == null) {
-            throw new RuntimeException(
-                "Can't create handler inside thread that has not called Looper.prepare()");
-        }
-        //获取与Looper绑定的MessageQueue
-        //因为一个Looper就只有一个MessageQueue，也就是与当前线程绑定的MessageQueue
-        mQueue = mLooper.mQueue;
-        mCallback = callback;
-        mAsynchronous = async;
-        
-    }
-{% endhighlight %}
-
-构造方法中获取誉创建Handler线程绑定的Looper对象 获取与Looper绑定的MessageQueue
-带上问题
-Looper.loop()中msg.target 是什么时候被绑定的 
-handlerMessage()是什么时候被调用的
-无论是调用handler.sendMessage（msg）还是调用handler.sendEmptyMessage(what) 我们最终都会追溯到
-{% highlight ruby %}
-public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
-        //引用Handler中的MessageQueue
-        //这个MessageQueue就是创建Looper时被创建的MessageQueue
-        MessageQueue queue = mQueue;
-        
-        if (queue == null) {
-            RuntimeException e = new RuntimeException(
-                    this + " sendMessageAtTime() called with no mQueue");
-            Log.w("Looper", e.getMessage(), e);
-            return false;
-        }
-        //将新来的Message加入到MessageQueue中
-        return enqueueMessage(queue, msg, uptimeMillis);
-    }
-{% endhighlight %}
-我们接下来分析enqueueMessage(queue, msg, uptimeMillis):
-{% highlight ruby %}
-private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
-        //显而易见，大写加粗的赋值啊！
-        **msg.target = this;**
-        if (mAsynchronous) {
-            msg.setAsynchronous(true);
-        }
-        return queue.enqueueMessage(msg, uptimeMillis);
-    }
-    {% endhighlight %}
-    ###  A2：handler.handleMessage(msg)在什么时候被回调的？ 通过以上的分析，我们很明确的知道Message中的target是在什么时候被赋值的了，我们先来分析在Looper.loop()中出现过的过的dispatchMessage(msg)方法
-{% highlight ruby %}
-public void dispatchMessage(Message msg) {
-        if (msg.callback != null) {
-            handleCallback(msg);
-        } else {
-            if (mCallback != null) {
-                if (mCallback.handleMessage(msg)) {
-                    return;
-                }
-            }
-            //看到这个大写加粗的方法调用没！
-            **handleMessage(msg);**
-        }
-    }
-       {% endhighlight %}
-加上以上分析，我们将之前分析结果串起来，就可以知道了某些东西： Looper.loop()不断地获取MessageQueue中的Message，然后调用与Message绑定的Handler对象的dispatchMessage方法，最后，我们看到了handleMessage就在dispatchMessage方法里被调用的。
-通过以上的分析，我们可以很清晰的知道Handler、Looper、Message、MessageQueue这四者的关系以及如何合作的了。
-
-#####  总结：
-当我们调用handler.sendMessage(msg)方法发送一个Message时，实际上这个Message是发送到与当前线程绑定的一个MessageQueue中，然后与当前线程绑定的Looper将会不断的从MessageQueue中取出新的Message，调用msg.target.dispathMessage(msg)方法将消息分发到与Message绑定的handler.handleMessage()方法中。
-
-一个Thread对应多个Handler 一个Thread对应一个Looper和MessageQueue，Handler与Thread共享Looper和MessageQueue。 Message只是消息的载体，将会被发送到与线程绑定的唯一的MessageQueue中，并且被与线程绑定的唯一的Looper分发，被与其自身绑定的Handler消费。
-
+ [原文地址](http://blog.csdn.net/sinat_38259539/article/details/71799078)
+[jekyll-docs]: http://jekyllrb.com/docs/home
+[jekyll-gh]:   https://github.com/jekyll/jekyll
+[jekyll-talk]: https://talk.jekyllrb.com/
